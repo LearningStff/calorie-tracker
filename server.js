@@ -3,8 +3,13 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 
+// password hashing and account tracking
+const bcrypt = require("bcrypt");
+const session = require("express-session");
+
 const app = express();
 const port = 8080;
+
 
 // EJS
 app.set("view engine", "ejs");
@@ -14,6 +19,15 @@ app.use(express.static("public"));
 
 // Allows us to access form data with req.body
 app.use(express.urlencoded({ extended: true }));
+
+
+// Session
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false
+}));
+
 
 // MongoDB
 mongoose.connect(process.env.MONGO_CONNECTION_STRING)
@@ -27,6 +41,13 @@ mongoose.connect(process.env.MONGO_CONNECTION_STRING)
 
 // Food Schema
 const foodschema = new mongoose.Schema({
+
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+
     food: {
         type: String,
         required: true
@@ -66,6 +87,12 @@ const Food = mongoose.model("Food", foodschema);
 // Goal Schema
 const goalSchema = new mongoose.Schema({
 
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+
     calorieGoal: {
         type: Number,
         required: true,
@@ -97,8 +124,49 @@ const goalSchema = new mongoose.Schema({
 const Goal = mongoose.model("Goal", goalSchema);
 
 
+// User Schema
+const userSchema = new mongoose.Schema({
+
+    username: {
+        type: String,
+        required: true,
+        trim: true,
+        unique: true
+    },
+
+    email: {
+        type: String,
+        required: true,
+        trim: true,
+        lowercase: true,
+        unique: true
+    },
+
+    password: {
+        type: String,
+        required: true
+    }
+
+}, {
+    timestamps: true
+});
+
+const User = mongoose.model("User", userSchema);
+
+
+// Require Login Middleware
+const requireLogin = (req, res, next) => {
+
+    if (!req.session.userId) {
+        return res.redirect("/login");
+    }
+
+    next();
+};
+
+
 // HOME
-app.get("/", async (req, res) => {
+app.get("/", requireLogin, async (req, res) => {
 
     // Today's date
     const startOfToday = new Date();
@@ -113,17 +181,25 @@ app.get("/", async (req, res) => {
 
     // Get today's foods
     const foods = await Food.find({
+
+        userId: req.session.userId,
+
         createdAt: {
             $gte: startOfToday
         }
+
     });
 
 
     // Get last 7 days of foods
     const weeklyFoods = await Food.find({
+
+        userId: req.session.userId,
+
         createdAt: {
             $gte: sevenDaysAgo
         }
+
     });
 
 
@@ -132,7 +208,8 @@ app.get("/", async (req, res) => {
 
     for (let i = 0; i < weeklyFoods.length; i++) {
 
-        const date = weeklyFoods[i].createdAt.toLocaleDateString();
+        const date =
+            weeklyFoods[i].createdAt.toLocaleDateString();
 
         trackedDays.add(date);
     }
@@ -178,7 +255,6 @@ app.get("/", async (req, res) => {
         const date =
             weeklyFoods[i].createdAt.toLocaleDateString();
 
-        // If this date does not exist yet
         if (!dailyTotals[date]) {
 
             dailyTotals[date] = {
@@ -187,7 +263,6 @@ app.get("/", async (req, res) => {
             };
         }
 
-        // Add food to that day's totals
         dailyTotals[date].calories +=
             Number(weeklyFoods[i].calories);
 
@@ -197,15 +272,23 @@ app.get("/", async (req, res) => {
 
 
     // Get Goals
-    let goal = await Goal.findOne();
+    let goal = await Goal.findOne({
+        userId: req.session.userId
+    });
 
+
+    // Create default goals if user does not have any
     if (!goal) {
 
         goal = await Goal.create({
+
+            userId: req.session.userId,
+
             calorieGoal: 2000,
             proteinGoal: 120,
             carbGoal: 250,
             fatGoal: 65
+
         });
     }
 
@@ -216,22 +299,33 @@ app.get("/", async (req, res) => {
 
     for (const date in dailyTotals) {
 
-        // Calorie goal reached
-        if (dailyTotals[date].calories >= goal.calorieGoal) {
+        if (
+            dailyTotals[date].calories >=
+            goal.calorieGoal
+        ) {
             calorieGoalHits++;
         }
 
-        // Protein goal reached
-        if (dailyTotals[date].protein >= goal.proteinGoal) {
+        if (
+            dailyTotals[date].protein >=
+            goal.proteinGoal
+        ) {
             proteinGoalHits++;
         }
     }
+
+
+    // Get currently logged-in user
+    const currentUser =
+        await User.findById(req.session.userId);
 
 
     // Send everything to home.ejs
     res.render("home.ejs", {
 
         foods: foods,
+
+        currentUser: currentUser,
 
         calorieGoal: goal.calorieGoal,
         proteinGoal: goal.proteinGoal,
@@ -251,13 +345,17 @@ app.get("/", async (req, res) => {
 
 
 // HISTORY
-app.get("/history", async (req, res) => {
+app.get("/history", requireLogin, async (req, res) => {
 
-    const foods = await Food.find().sort({
+    const foods = await Food.find({
+        userId: req.session.userId
+    }).sort({
         createdAt: -1
     });
 
+
     const groupedFoods = {};
+
 
     for (let i = 0; i < foods.length; i++) {
 
@@ -291,11 +389,13 @@ app.get("/history", async (req, res) => {
 
 
 // ADD FOOD
-app.post("/entries", async (req, res) => {
+app.post("/entries", requireLogin, async (req, res) => {
 
     try {
 
         const FoodToAdd = {
+
+            userId: req.session.userId,
 
             food: req.body.food,
 
@@ -325,13 +425,14 @@ app.post("/entries", async (req, res) => {
 
 
 // DELETE FOOD
-app.post("/entries/:id/delete", async (req, res) => {
+app.post("/entries/:id/delete", requireLogin, async (req, res) => {
 
     try {
 
-        await Food.findByIdAndDelete(
-            req.params.id
-        );
+        await Food.findOneAndDelete({
+            _id: req.params.id,
+            userId: req.session.userId
+        });
 
         res.redirect("/");
 
@@ -347,18 +448,23 @@ app.post("/entries/:id/delete", async (req, res) => {
 
 
 // EDIT FOOD PAGE
-app.get("/entries/:id/edit", async (req, res) => {
+app.get("/entries/:id/edit", requireLogin, async (req, res) => {
 
     try {
 
-        const foodToEdit =
-            await Food.findById(req.params.id);
+        const foodToEdit = await Food.findOne({
+            _id: req.params.id,
+            userId: req.session.userId
+        });
+
+
+        if (!foodToEdit) {
+            return res.redirect("/");
+        }
 
 
         res.render("edit.ejs", {
-
             food: foodToEdit
-
         });
 
     } catch (error) {
@@ -372,17 +478,157 @@ app.get("/entries/:id/edit", async (req, res) => {
 });
 
 
-// UPDATE FOOD
-app.post("/entries/:id/edit", async (req, res) => {
+// ACCOUNT CREATION
+app.get("/register", (req, res) => {
+
+    res.render("register.ejs");
+});
+
+
+app.post("/register", async (req, res) => {
 
     try {
 
-        await Food.findByIdAndUpdate(
+        const username = req.body.username;
+        const email = req.body.email;
+        const password = req.body.password;
 
-            req.params.id,
+
+        // Check if email already exists
+        const existingUser =
+            await User.findOne({
+                email: email
+            });
+
+
+        if (existingUser) {
+
+            return res.send(
+                "An account with this email already exists."
+            );
+        }
+
+
+        // Hash password
+        const hashedPassword =
+            await bcrypt.hash(password, 10);
+
+
+        // Create user
+        const user = await User.create({
+
+            username: username,
+
+            email: email,
+
+            password: hashedPassword
+        });
+
+
+        // Log the new user in
+        req.session.userId = user._id;
+
+
+        res.redirect("/");
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).send(
+            "Something went wrong."
+        );
+    }
+});
+
+
+// LOGIN
+app.get("/login", (req, res) => {
+
+    res.render("login.ejs");
+});
+
+
+app.post("/login", async (req, res) => {
+
+    try {
+
+        const email = req.body.email;
+        const password = req.body.password;
+
+
+        // Find user by email
+        const user =
+            await User.findOne({
+                email: email
+            });
+
+
+        if (!user) {
+
+            return res.send(
+                "Incorrect email or password."
+            );
+        }
+
+
+        // Compare entered password with hashed password
+        const passwordMatches =
+            await bcrypt.compare(
+                password,
+                user.password
+            );
+
+
+        if (!passwordMatches) {
+
+            return res.send(
+                "Incorrect email or password."
+            );
+        }
+
+
+        // Remember logged-in user
+        req.session.userId = user._id;
+
+
+        res.redirect("/");
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).send(
+            "Something went wrong."
+        );
+    }
+});
+
+
+// LOGOUT
+app.post("/logout", (req, res) => {
+
+    req.session.destroy(() => {
+
+        res.redirect("/login");
+
+    });
+});
+
+
+// UPDATE FOOD
+app.post("/entries/:id/edit", requireLogin, async (req, res) => {
+
+    try {
+
+        await Food.findOneAndUpdate(
 
             {
+                _id: req.params.id,
+                userId: req.session.userId
+            },
 
+            {
                 food: req.body.food,
 
                 protein: req.body.protein,
@@ -392,7 +638,6 @@ app.post("/entries/:id/edit", async (req, res) => {
                 fat: req.body.fat,
 
                 calories: req.body.calories
-
             },
 
             {
@@ -416,25 +661,28 @@ app.post("/entries/:id/edit", async (req, res) => {
 
 
 // CLEAR HISTORY
-app.post("/history/clear", async (req, res) => {
+app.post("/history/clear", requireLogin, async (req, res) => {
 
-    await Food.deleteMany({});
+    await Food.deleteMany({
+        userId: req.session.userId
+    });
 
     res.redirect("/history");
 });
 
 
 // UPDATE GOALS
-app.post("/goals", async (req, res) => {
+app.post("/goals", requireLogin, async (req, res) => {
 
     try {
 
         await Goal.findOneAndUpdate(
 
-            {},
+            {
+                userId: req.session.userId
+            },
 
             {
-
                 calorieGoal:
                     req.body.calorieGoal,
 
@@ -446,7 +694,6 @@ app.post("/goals", async (req, res) => {
 
                 fatGoal:
                     req.body.fatGoal
-
             },
 
             {
@@ -476,5 +723,6 @@ const startServer = () => {
         `Server running at http://localhost:${port}`
     );
 };
+
 
 app.listen(port, startServer);
