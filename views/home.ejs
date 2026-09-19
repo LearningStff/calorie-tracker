@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Calorie Tracker</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen text-slate-900">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-slate-200 shadow-sm">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+
+            <h1 class="text-xl font-bold tracking-tight">
+                Calorie<span class="text-emerald-600">Tracker</span>
+            </h1>
+
+            <div class="flex gap-6 text-sm font-medium">
+
+                <a href="/" class="text-emerald-600">
+                    Home
+                </a>
+
+                <a href="/history" class="text-slate-500 hover:text-slate-900">
+                    History
+                </a>
+
+            </div>
+
+        </div>
+    </nav>
+
+
+    <main class="max-w-5xl mx-auto px-6 py-10">
+
+        <!-- Header -->
+        <div class="mb-8">
+
+            <p class="text-sm font-semibold text-emerald-600 uppercase tracking-wider mb-2">
+                Daily Nutrition
+            </p>
+
+            <h2 class="text-4xl font-bold tracking-tight">
+                Today's Nutrition
+            </h2>
+
+            <p class="text-slate-500 mt-2">
+                Track your calories, protein, carbs, and fat for the day.
+            </p>
+
+        </div>
+
+
+        <!-- Calculate Totals -->
+        <%
+            let totalCal = 0;
+            let totalProtein = 0;
+            let totalCarbs = 0;
+            let totalFat = 0;
+
+            for (let i = 0; i < foods.length; i++) {
+                totalProtein = totalProtein + Number(foods[i].protein);
+                totalCarbs = totalCarbs + Number(foods[i].carbs || 0);
+                totalFat = totalFat + Number(foods[i].fat || 0);
+                totalCal = totalCal + Number(foods[i].calories);
+            }
+
+            const caloriePercentage = Math.min(
+                (totalCal / calorieGoal) * 100,
+                100
+            );
+
+            const proteinPercentage = Math.min(
+                (totalProtein / proteinGoal) * 100,
+                100
+            );
+
+            const carbPercentage = Math.min(
+                (totalCarbs / carbGoal) * 100,
+                100
+            );
+
+            const fatPercentage = Math.min(
+                (totalFat / fatGoal) * 100,
+                100
+            );
+        %>
+
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+
+            <!-- Calories -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+
+                <div class="flex justify-between items-start">
+
+                    <div class="flex-1">
+
+                        <p class="text-sm font-medium text-slate-500">
+                            Calories
+                        </p>
+
+                        <div class="flex items-end gap-2 mt-2">
+
+                            <h3 class="text-3xl font-bold text-orange-600">
+                                <%= totalCal %>
+                            </h3>
+
+                            <span class="text-slate-400 mb-1">
+                                / <%= calorieGoal %>
+                            </span>
+
+                        </div>
+
+                        <!-- Calorie Progress Bar -->
+                        <div class="w-full bg-slate-200 rounded-full h-2 mt-4">
+
+                            <div
+                                class="bg-orange-500 h-2 rounded-full transition-all"
+                                style="width: <%= caloriePercentage %>%"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                    <span class="bg-orange-50 text-orange-600 text-xs font-semibold px-3 py-1 rounded-full ml-6">
+                        KCAL
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Protein -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+
+                <div class="flex justify-between items-start">
+
+                    <div class="flex-1">
+
+                        <p class="text-sm font-medium text-slate-500">
+                            Protein
+                        </p>
+
+                        <div class="flex items-end gap-2 mt-2">
+
+                            <h3 class="text-3xl font-bold text-blue-600">
+                                <%= totalProtein %>g
+                            </h3>
+
+                            <span class="text-slate-400 mb-1">
+                                / <%= proteinGoal %>g
+                            </span>
+
+                        </div>
+
+                        <!-- Protein Progress Bar -->
+                        <div class="w-full bg-slate-200 rounded-full h-2 mt-4">
+
+                            <div
+                                class="bg-blue-500 h-2 rounded-full transition-all"
+                                style="width: <%= proteinPercentage %>%"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                    <span class="bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-1 rounded-full ml-6">
+                        PROTEIN
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Carbs -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+
+                <div class="flex justify-between items-start">
+
+                    <div class="flex-1">
+
+                        <p class="text-sm font-medium text-slate-500">
+                            Carbs
+                        </p>
+
+                        <div class="flex items-end gap-2 mt-2">
+
+                            <h3 class="text-3xl font-bold text-amber-600">
+                                <%= totalCarbs %>g
+                            </h3>
+
+                            <span class="text-slate-400 mb-1">
+                                / <%= carbGoal %>g
+                            </span>
+
+                        </div>
+
+                        <!-- Carb Progress Bar -->
+                        <div class="w-full bg-slate-200 rounded-full h-2 mt-4">
+
+                            <div
+                                class="bg-amber-500 h-2 rounded-full transition-all"
+                                style="width: <%= carbPercentage %>%"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                    <span class="bg-amber-50 text-amber-600 text-xs font-semibold px-3 py-1 rounded-full ml-6">
+                        CARBS
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Fat -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+
+                <div class="flex justify-between items-start">
+
+                    <div class="flex-1">
+
+                        <p class="text-sm font-medium text-slate-500">
+                            Fat
+                        </p>
+
+                        <div class="flex items-end gap-2 mt-2">
+
+                            <h3 class="text-3xl font-bold text-purple-600">
+                                <%= totalFat %>g
+                            </h3>
+
+                            <span class="text-slate-400 mb-1">
+                                / <%= fatGoal %>g
+                            </span>
+
+                        </div>
+
+                        <!-- Fat Progress Bar -->
+                        <div class="w-full bg-slate-200 rounded-full h-2 mt-4">
+
+                            <div
+                                class="bg-purple-500 h-2 rounded-full transition-all"
+                                style="width: <%= fatPercentage %>%"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                    <span class="bg-purple-50 text-purple-600 text-xs font-semibold px-3 py-1 rounded-full ml-6">
+                        FAT
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Weekly Stats -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-8 shadow-sm">
+
+            <div class="mb-6">
+
+                <p class="text-xs uppercase tracking-wider font-semibold text-emerald-600">
+                    Last 7 Days
+                </p>
+
+                <h3 class="text-xl font-bold mt-1">
+                    Weekly Summary
+                </h3>
+
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+
+                <div class="bg-orange-50 rounded-xl p-4">
+
+                    <p class="text-sm text-slate-500">
+                        Avg. Calories
+                    </p>
+
+                    <p class="text-2xl font-bold text-orange-600 mt-1">
+                        <%= averageCalories %>
+                    </p>
+
+                </div>
+
+                <div class="bg-blue-50 rounded-xl p-4">
+
+                    <p class="text-sm text-slate-500">
+                        Avg. Protein
+                    </p>
+
+                    <p class="text-2xl font-bold text-blue-600 mt-1">
+                        <%= averageProtein %>g
+                    </p>
+
+                </div>
+
+                <div class="bg-emerald-50 rounded-xl p-4">
+
+                    <p class="text-sm text-slate-500">
+                        Days Tracked
+                    </p>
+
+                    <p class="text-2xl font-bold text-emerald-600 mt-1">
+                        <%= daysTracked %> / 7
+                    </p>
+
+                </div>
+
+                <div class="bg-orange-50 rounded-xl p-4">
+
+                    <p class="text-sm text-slate-500">
+                        Calorie Goal Hit
+                    </p>
+
+                    <p class="text-2xl font-bold text-orange-600 mt-1">
+                        <%= calorieGoalHits %> / <%= daysTracked %>
+                    </p>
+
+                </div>
+
+                <div class="bg-blue-50 rounded-xl p-4">
+
+                    <p class="text-sm text-slate-500">
+                        Protein Goal Hit
+                    </p>
+
+                    <p class="text-2xl font-bold text-blue-600 mt-1">
+                        <%= proteinGoalHits %> / <%= daysTracked %>
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Edit Daily Goals -->
+        <form
+            action="/goals"
+            method="POST"
+            class="bg-white rounded-2xl border border-slate-200 p-6 mb-8 shadow-sm"
+        >
+
+            <div class="mb-6">
+
+                <p class="text-xs uppercase tracking-wider font-semibold text-emerald-600">
+                    Daily Targets
+                </p>
+
+                <h3 class="text-xl font-bold mt-1">
+                    Edit Daily Goals
+                </h3>
+
+            </div>
+
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                <!-- Calorie Goal -->
+                <div>
+
+                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                        Calorie Goal
+                    </label>
+
+                    <input
+                        type="number"
+                        name="calorieGoal"
+                        value="<%= calorieGoal %>"
+                        required
+                        min="1"
+                        class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition"
+                    >
+
+                </div>
+
+
+                <!-- Protein Goal -->
+                <div>
+
+                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                        Protein Goal
+                    </label>
+
+                    <input
+                        type="number"
+                        name="proteinGoal"
+                        value="<%= proteinGoal %>"
+                        required
+                        min="1"
+                        class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+                    >
+
+                </div>
+
+
+                <!-- Carb Goal -->
+                <div>
+
+                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                        Carb Goal
+                    </label>
+
+                    <input
+                        type="number"
+                        name="carbGoal"
+                        value="<%= carbGoal %>"
+                        required
+                        min="1"
+                        class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition"
+                    >
+
+                </div>
+
+
+                <!-- Fat Goal -->
+                <div>
+
+                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                        Fat Goal
+                    </label>
+
+                    <input
+                        type="number"
+                        name="fatGoal"
+                        value="<%= fatGoal %>"
+                        required
+                        min="1"
+                        class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- Save Goals -->
+            <div class="flex justify-end mt-5">
+
+                <button
+                    type="submit"
+                    class="bg-emerald-600 text-white font-medium rounded-lg px-8 py-2.5 hover:bg-emerald-700 transition"
+                >
+                    Save Goals
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <!-- Add Food -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-8 shadow-sm">
+
+            <div class="mb-6">
+
+                <p class="text-xs uppercase tracking-wider font-semibold text-emerald-600">
+                    New Entry
+                </p>
+
+                <h3 class="text-xl font-bold mt-1">
+                    Add Food
+                </h3>
+
+            </div>
+
+
+            <form action="/entries" method="POST">
+
+                <!-- Inputs -->
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+
+                    <!-- Food -->
+                    <div>
+
+                        <label class="block text-sm font-medium text-slate-700 mb-2">
+                            Food
+                        </label>
+
+                        <input
+                            type="text"
+                            name="food"
+                            placeholder="Chicken breast"
+                            required
+                            class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
+                        >
+
+                    </div>
+
+
+                    <!-- Calories -->
+                    <div>
+
+                        <label class="block text-sm font-medium text-slate-700 mb-2">
+                            Calories
+                        </label>
+
+                        <input
+                            type="number"
+                            name="calories"
+                            placeholder="300"
+                            required
+                            min="0"
+                            class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
+                        >
+
+                    </div>
+
+
+                    <!-- Protein -->
+                    <div>
+
+                        <label class="block text-sm font-medium text-slate-700 mb-2">
+                            Protein (g)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="protein"
+                            placeholder="45"
+                            required
+                            min="0"
+                            class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
+                        >
+
+                    </div>
+
+
+                    <!-- Carbs -->
+                    <div>
+
+                        <label class="block text-sm font-medium text-slate-700 mb-2">
+                            Carbs (g)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="carbs"
+                            placeholder="30"
+                            required
+                            min="0"
+                            class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
+                        >
+
+                    </div>
+
+
+                    <!-- Fat -->
+                    <div>
+
+                        <label class="block text-sm font-medium text-slate-700 mb-2">
+                            Fat (g)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="fat"
+                            placeholder="10"
+                            required
+                            min="0"
+                            class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- Button -->
+                <div class="flex justify-end mt-5">
+
+                    <button
+                        type="submit"
+                        class="bg-emerald-600 text-white font-medium rounded-lg px-8 py-2.5 hover:bg-emerald-700 transition"
+                    >
+                        Add Food
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <!-- Food Log -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
+            <div class="px-6 py-5 bg-emerald-50 border-b border-emerald-100 flex justify-between items-center">
+
+                <div>
+
+                    <p class="text-xs uppercase tracking-wider font-semibold text-emerald-600">
+                        Food Log
+                    </p>
+
+                    <h3 class="text-xl font-bold mt-1">
+                        Today's Food
+                    </h3>
+
+                </div>
+
+                <span class="text-sm text-slate-500">
+                    <%= foods.length %> entries
+                </span>
+
+            </div>
+
+
+            <!-- No Food -->
+            <% if (foods.length === 0) { %>
+
+                <div class="p-12 text-center text-slate-400">
+                    No food logged yet.
+                </div>
+
+
+            <!-- Display Foods -->
+            <% } else { %>
+
+                <div class="divide-y divide-slate-100">
+
+                    <% for (let i = 0; i < foods.length; i++) { %>
+
+                        <div class="px-6 py-5 flex justify-between items-center hover:bg-slate-50 transition">
+
+                            <!-- Food Name -->
+                            <div>
+
+                                <h4 class="font-semibold text-slate-900">
+                                    <%= foods[i].food %>
+                                </h4>
+
+                                <p class="text-xs text-slate-400 mt-1">
+                                    Food entry
+                                </p>
+
+                            </div>
+
+
+                            <!-- Nutrition -->
+                            <div class="flex items-center gap-3 text-sm">
+
+                                <span class="bg-orange-50 text-orange-700 px-3 py-1.5 rounded-lg font-medium">
+                                    <%= foods[i].calories %> kcal
+                                </span>
+
+                                <span class="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-medium">
+                                    <%= foods[i].protein %>g protein
+                                </span>
+
+                                <span class="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg font-medium">
+                                    <%= foods[i].carbs || 0 %>g carbs
+                                </span>
+
+                                <span class="bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg font-medium">
+                                    <%= foods[i].fat || 0 %>g fat
+                                </span>
+
+                                <a
+                                    href="/entries/<%= foods[i]._id %>/edit"
+                                    class="text-slate-500 hover:text-emerald-600 font-medium px-2 transition"
+                                >
+                                    Edit
+                                </a>
+
+                                <form
+                                    action="/entries/<%= foods[i]._id %>/delete"
+                                    method="POST"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="text-slate-400 hover:text-red-600 font-medium px-2 transition"
+                                    >
+                                        Delete
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    <% } %>
+
+                </div>
+
+            <% } %>
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>

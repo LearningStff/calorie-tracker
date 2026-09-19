@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Food</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen text-slate-900">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-slate-200 shadow-sm">
+
+        <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+
+            <h1 class="text-xl font-bold tracking-tight">
+                Calorie<span class="text-emerald-600">Tracker</span>
+            </h1>
+
+            <div class="flex gap-6 text-sm font-medium">
+
+                <a href="/" class="text-slate-500 hover:text-slate-900">
+                    Home
+                </a>
+
+                <a href="/history" class="text-slate-500 hover:text-slate-900">
+                    History
+                </a>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+
+    <main class="max-w-xl mx-auto px-6 py-10">
+
+        <!-- Page Header -->
+        <div class="mb-8">
+
+            <p class="text-sm font-semibold text-emerald-600 uppercase tracking-wider mb-2">
+                Food Entry
+            </p>
+
+            <h2 class="text-4xl font-bold tracking-tight">
+                Edit Food
+            </h2>
+
+            <p class="text-slate-500 mt-2">
+                Update the nutrition information for this entry.
+            </p>
+
+        </div>
+
+
+        <!-- Edit Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
+            <!-- Card Header -->
+            <div class="bg-emerald-50 border-b border-emerald-100 px-6 py-5">
+
+                <p class="text-xs uppercase tracking-wider font-semibold text-emerald-600">
+                    Editing
+                </p>
+
+                <h3 class="text-xl font-bold mt-1">
+                    <%= food.food %>
+                </h3>
+
+            </div>
+
+
+            <!-- Form -->
+            <form
+                action="/entries/<%= food._id %>/edit"
+                method="POST"
+                class="p-6"
+            >
+
+                <!-- Food -->
+                <div class="mb-5">
+
+                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                        Food
+                    </label>
+
+                    <input
+                        type="text"
+                        name="food"
+                        value="<%= food.food %>"
+                        required
+                        class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
+                    >
+
+                </div>
+
+
+                <!-- Calories -->
+                <div class="mb-5">
+
+                    <label class="block text-sm font-medium text-orange-700 mb-2">
+                        Calories
+                    </label>
+
+                    <input
+                        type="number"
+                        name="calories"
+                        value="<%= food.calories %>"
+                        required
+                        min="0"
+                        class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition"
+                    >
+
+                </div>
+
+
+                <!-- Protein -->
+                <div class="mb-5">
+
+                    <label class="block text-sm font-medium text-blue-700 mb-2">
+                        Protein (g)
+                    </label>
+
+                    <input
+                        type="number"
+                        name="protein"
+                        value="<%= food.protein %>"
+                        required
+                        min="0"
+                        class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+                    >
+
+                </div>
+
+
+                <!-- Carbs -->
+                <div class="mb-5">
+
+                    <label class="block text-sm font-medium text-amber-700 mb-2">
+                        Carbs (g)
+                    </label>
+
+                    <input
+                        type="number"
+                        name="carbs"
+                        value="<%= food.carbs || 0 %>"
+                        required
+                        min="0"
+                        class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition"
+                    >
+
+                </div>
+
+
+                <!-- Fat -->
+                <div class="mb-7">
+
+                    <label class="block text-sm font-medium text-purple-700 mb-2">
+                        Fat (g)
+                    </label>
+
+                    <input
+                        type="number"
+                        name="fat"
+                        value="<%= food.fat || 0 %>"
+                        required
+                        min="0"
+                        class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition"
+                    >
+
+                </div>
+
+
+                <!-- Buttons -->
+                <div class="flex gap-3">
+
+                    <button
+                        type="submit"
+                        class="bg-emerald-600 text-white font-medium px-5 py-2.5 rounded-lg hover:bg-emerald-700 transition"
+                    >
+                        Save Changes
+                    </button>
+
+                    <a
+                        href="/"
+                        class="bg-white border border-slate-200 text-slate-600 font-medium px-5 py-2.5 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition"
+                    >
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>
