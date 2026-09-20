@@ -253,7 +253,7 @@ app.get("/", requireLogin, async (req, res) => {
     for (let i = 0; i < weeklyFoods.length; i++) {
 
         const date =
-            weeklyFoods[i].createdAt.toLocaleDateString();
+            weeklyFoods[i].createdAt.toLocaleDateString("en-CA");
 
         if (!dailyTotals[date]) {
 
@@ -338,7 +338,8 @@ app.get("/", requireLogin, async (req, res) => {
         daysTracked: daysTracked,
 
         calorieGoalHits: calorieGoalHits,
-        proteinGoalHits: proteinGoalHits
+        proteinGoalHits: proteinGoalHits,
+        dailyTotals: dailyTotals
 
     });
 });

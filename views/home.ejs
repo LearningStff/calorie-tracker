@@ -66,6 +66,34 @@
         </div>
 
 
+        <!-- Calorie Chart -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-8 shadow-sm">
+
+            <div class="flex items-center justify-between mb-5">
+
+                <div>
+                    <p class="text-xs uppercase tracking-wider font-semibold text-emerald-600">
+                        Last 7 Days
+                    </p>
+
+                    <h2 class="text-xl font-bold text-slate-900 mt-1">
+                        Calorie Trend
+                    </h2>
+                </div>
+
+                <div class="bg-orange-50 text-orange-600 px-4 py-2 rounded-xl text-sm font-semibold">
+                    Goal: <%= calorieGoal %> kcal
+                </div>
+
+            </div>
+
+            <div class="h-56">
+                <canvas id="calorieChart"></canvas>
+            </div>
+
+        </div>
+
+
         <!-- Calculate Totals -->
         <%
             let totalCal = 0;
@@ -722,6 +750,130 @@
         </div>
 
     </main>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const dailyTotals = <%- JSON.stringify(dailyTotals) %>;
+
+        const labels = [];
+        const calories = [];
+
+        for (let i = 6; i >= 0; i--) {
+
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+
+            const dateKey = date.toLocaleDateString("en-CA");
+
+            const dayName = date.toLocaleDateString("en-US", {
+                weekday: "short"
+            });
+
+            labels.push(dayName);
+
+            if (dailyTotals[dateKey]) {
+                calories.push(dailyTotals[dateKey].calories);
+            } else {
+                calories.push(null);
+            }
+        }
+
+        const calorieChart =
+            document.getElementById("calorieChart");
+
+        new Chart(calorieChart, {
+            type: "line",
+
+            data: {
+                labels: labels,
+
+                datasets: [{
+                    data: calories,
+
+                    borderColor: "#10b981",
+                    backgroundColor: "rgba(16, 185, 129, 0.08)",
+
+                    borderWidth: 3,
+
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+
+                    pointBackgroundColor: "#ffffff",
+                    pointBorderColor: "#10b981",
+                    pointBorderWidth: 3,
+
+                    tension: 0.35,
+                    fill: true,
+
+                    spanGaps: true
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                interaction: {
+                    intersect: false,
+                    mode: "index"
+                },
+
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+
+                    tooltip: {
+                        displayColors: false,
+
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw + " kcal";
+                            }
+                        }
+                    }
+                },
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+
+                        border: {
+                            display: false
+                        },
+
+                        ticks: {
+                            padding: 10,
+
+                            callback: function(value) {
+                                return value + " kcal";
+                            }
+                        },
+
+                        grid: {
+                            color: "#f1f5f9"
+                        }
+                    },
+
+                    x: {
+                        border: {
+                            display: false
+                        },
+
+                        grid: {
+                            display: false
+                        },
+
+                        ticks: {
+                            padding: 8
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 
 </body>
 
